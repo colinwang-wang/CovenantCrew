@@ -55,8 +55,12 @@ description: Web 管理端（中后台）开发规范。当开发后台管理系
 - MUST：API 响应类型使用后端生成的 TypeScript 定义
 - MUST：表单提交按钮必须带防重复点击
 - MUST：列表页搜索条件变更后自动重置页码到第 1 页
+- MUST：API 路径从契约文件或后端路由文件复制，禁止凭记忆手写
+- MUST：request 封装的 baseURL + 相对路径必须等于后端完整路由路径，在注释中标明拼接结果
+- MUST：登录等特殊路由如不在统一 baseURL 下，使用独立 axios 实例或绝对路径
 - NEVER：直接暴露用户敏感信息明文，必须脱敏展示
 - NEVER：使用 `window.location.href` 跳转
+- NEVER：页面组件返回空 `<div>TODO</div>` 或仅有占位文字
 
 ## 交付自检规范
 
