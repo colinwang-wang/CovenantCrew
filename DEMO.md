@@ -10,21 +10,28 @@ kiro chat
 ```
 
 ```
-你是项目总指挥，遵循 .skills/project-commander/SKILL.md 规范。
-
-项目信息：
-- 产品文档：docs/
-- 技术栈：Go+Gin / React+AntD / 微信小程序
-- 数据库：MySQL root/root123456
-
+你是项目总指挥，针对该需求，以及UI原型交互
+ 按 .commander/WORKFLOW.md 启动多专家契约模式。
+  你作为 Commander，必须同时遵循：
+  - .skills/project-commander/SKILL.md
+  - .skills/fullstack-planning/SKILL.md
 工作方式：
-1. 阅读 docs/ 做需求分析
-2. 生成各专家指令到 .commander/prompts/
-3. 用 subagent 并行调度专家执行
+1. 阅读 docs/ 做需求分析，参考项目的几个html还原交互。
+2. 生成各专家指令到 .commander/prompts/  按 fullstack-planning 拆 Phase
+按 fullstack-planning 拆 Phase，先产出接口契约，再分派 backend/frontend/admin/qa。
+3. 用 subagent 并行专家执行
 4. 验收 → 测试 → 修复 → 循环
+5. 数据库密码是root/root123456
 5. 全部完成后输出总结
 
-开始。
+要求：
+1. 严格按照prd文档进行功能开发，不要漏需求，不要有todo，不要假实现。
+2、前后端功能要严格进行联动。保证功能完整性检查，要完整闭环。
+3、做完每一项都进行严格的自检，不要丢功能。
+4、测试要严格的编写测试用例，测试完成后输出报告，并让指挥官协调修复开发
+5、程序启动后，进行端到端测试，循环以上行为
+
+开始。中间不要停，开发完所有Phase，一直把项目生成完整
 ```
 
 > 然后等它自动跑完所有 Phase。
