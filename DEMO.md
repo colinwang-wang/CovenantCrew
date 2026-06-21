@@ -1,40 +1,70 @@
 # CovenantCrew 使用 Demo
 
+## 0. 新项目初始化（推荐）
+
+```bash
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+./scripts/init-project.sh ../my-project saas_admin "My Project"
+cd ../my-project
+```
+
+然后做人类动作：
+
+1. 把客户原始文档、截图、原型放进 `docs/00-intake/raw/`
+2. 填写 `docs/00-intake/intake-packet.md`
+3. 把参考链接写进 `docs/00-intake/source-links.md`
+4. 启动 Commander 做阶段 A
+
 ## 方式一：单终端模式（推荐）
 
-一个终端搞定，指挥官通过 subagent 自动调度专家。
+一个终端搞定，但前面四个关键节点必须由人类批准：PRD、设计方向、技术栈 ADR、Contract Bundle。
 
 ```bash
 cd my-project
 kiro chat
 ```
 
+### 阶段 A：需求审计
+
 ```
-你是项目总指挥，针对该需求，以及UI原型交互
- 按 .commander/WORKFLOW.md 启动多专家契约模式。
-  你作为 Commander，必须同时遵循：
-  - .skills/project-commander/SKILL.md
-  - .skills/fullstack-planning/SKILL.md
-工作方式：
-1. 阅读 docs/ 做需求分析，参考项目的几个html还原交互。
-2. 生成各专家指令到 .commander/prompts/  按 fullstack-planning 拆 Phase
-按 fullstack-planning 拆 Phase，先产出接口契约，再分派 backend/frontend/admin/qa。
-3. 用 subagent 并行专家执行
-4. 验收 → 测试 → 修复 → 循环
-5. 数据库密码是root/root123456
-5. 全部完成后输出总结
+你是项目总指挥，遵循 .skills/project-commander/SKILL.md 和 .skills/fullstack-planning/SKILL.md。
 
-要求：
-1. 严格按照prd文档进行功能开发，不要漏需求，不要有todo，不要假实现。
-2、前后端功能要严格进行联动。保证功能完整性检查，要完整闭环。
-3、做完每一项都进行严格的自检，不要丢功能。
-4、测试要严格的编写测试用例，测试完成后输出报告，并让指挥官协调修复开发
-5、程序启动后，进行端到端测试，循环以上行为
+当前只做“需求审计与 PRD 草稿”，不要写代码，不要启动多专家开发。
 
-开始。中间不要停，开发完所有Phase，一直把项目生成完整
+项目资料：
+- 客户原始资料：docs/00-intake/raw/
+- 参考链接：docs/00-intake/source-links.md
+- 人类填写的信息：docs/00-intake/intake-packet.md
+
+请完成：
+1. 输出 docs/00-intake/requirement-audit.md
+2. 输出 docs/00-intake/assumptions.md
+3. 输出 docs/01-prd/PRD.draft.md
+4. 输出 docs/01-prd/acceptance-criteria.draft.md
+5. 输出 docs/01-prd/traceability-matrix.draft.md
+
+完成后停止，等待我回答 P0 问题并批准 PRD。
 ```
 
-> 然后等它自动跑完所有 Phase。
+### 阶段 B-D：批准 PRD、设计/ADR、Contract Bundle
+
+直接复制 `docs/START_COMMANDER_PROMPTS.md` 中的阶段 B、C、D。每个阶段完成后，人类确认再继续。
+
+### 阶段 E：并行开发
+
+Contract Bundle 批准后，再复制 `docs/START_COMMANDER_PROMPTS.md` 的阶段 E：
+
+```
+Contract Bundle 已批准。现在可以启动多专家并行开发。
+
+你是项目总指挥，遵循 .skills/project-commander/SKILL.md。
+
+请按 docs/01-prd/traceability-matrix.md 拆分 Phase，生成 .commander/phases/phase-XX.md 和 .commander/prompts/{role}.md。
+每份专家指令必须包含背景、依赖、允许修改文件、禁止修改文件、任务列表、交付标准、自检清单。
+每个 Phase 结束后调度 QA，QA 未 PASS 不进入下一 Phase。
+
+请自动推进，遇到业务范围、技术栈、外部服务、数据口径、客户变更相关问题时停止并向我提问。
+```
 
 ---
 
@@ -50,8 +80,8 @@ kiro chat
 
 ```
 你是项目总指挥。阅读 docs/ 下产品文档，
-按 .skills/fullstack-planning/SKILL.md 做需求分析和 Phase 1 任务拆解，
-生成各专家指令到 .commander/prompts/
+按 .skills/fullstack-planning/SKILL.md 先做需求审计、PRD、设计、ADR、Contract Bundle。
+没有人类批准 Contract Bundle 前，不生成专家开发指令。
 ```
 
 等指令文件生成后，去其他终端启动专家。
@@ -96,11 +126,12 @@ kiro chat
 
 ```
 各专家已完成，请验收：
-1. 跑 scripts/verify.sh
+1. 对照 docs/QUALITY_GATES.md
 2. 读取 .commander/status/ 下所有报告
-3. 判定通过/不通过
-4. 通过则生成下一 Phase 指令
-5. 不通过则生成修复指令
+3. 对照 docs/01-prd/traceability-matrix.md 检查需求覆盖
+4. 判定通过/不通过
+5. 通过则生成下一 Phase 指令
+6. 不通过则生成修复指令
 ```
 
 ---
@@ -176,7 +207,7 @@ kiro chat --non-interactive --prompt "
 专家读指令   ← .commander/prompts/{role}.md
 专家写报告   → .commander/status/{role}.md
 指挥官读报告 ← .commander/status/{role}.md
-契约文件     ↔ .commander/contracts/api-v1.yaml
+契约包       ↔ .commander/contracts/
 ```
 
 ---

@@ -43,8 +43,10 @@ backend/
 
 ## 契约职责
 - 你是契约的**生产者**
-- 定义好接口后，将 Swagger/OpenAPI 文件输出到 `.commander/contracts/`
+- 定义好接口后，将 Swagger/OpenAPI 文件输出到 `.commander/contracts/openapi.yaml`
+- 如任务明确要求，更新 `.commander/contracts/database.md`、`error-codes.md`、`seed-data.md`
 - 前端专家依赖你的契约文件
+- 未经指挥官要求，不得擅自改变已批准契约的行为
 
 ## 状态报告格式
 完成任务后写入 `.commander/status/backend.md`：
@@ -57,11 +59,21 @@ backend/
 ## 完成内容
 - ...
 
+## 修改文件
+- ...
+
+## 运行命令
+- `go build ./...`
+- `go test ./...`
+
 ## 自检报告
 - [x] go build ./... 零错误
 - [x] go test ./... 全部通过
 - [x] 接口返回正确业务码
 - [x] 路由已注册
+
+## 契约变更
+- 无 / 已更新 .commander/contracts/...
 
 ## 问题与阻塞
 - 无
@@ -74,5 +86,6 @@ backend/
 - MUST：先读指令文件再开始工作
 - MUST：完成后写状态报告
 - MUST：接口变更时更新契约文件
+- MUST：只修改指令允许范围内的文件
 - NEVER：不看指令自行决定做什么
 - NEVER：修改其他专家负责的代码（admin/、miniapp/）

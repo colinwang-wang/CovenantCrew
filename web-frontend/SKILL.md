@@ -16,6 +16,7 @@ description: Web 用户端开发规范。当开发用户端网站页面、响应
 2. **路由懒加载**：所有页面组件使用懒加载
 3. **状态管理**：全局状态使用状态管理库，页面级状态使用组件局部状态
 4. **API 封装**：统一 request 封装，处理 Token 过期、错误码提示、Loading 状态
+5. **契约消费者**：从 `.commander/contracts/` 使用生成类型和错误码规则，发现不一致时报告，不自行修改契约
 
 ### 2. 国际化（i18n）
 
@@ -60,8 +61,10 @@ description: Web 用户端开发规范。当开发用户端网站页面、响应
 - MUST：所有文案通过 i18n 函数输出，禁止硬编码文案
 - MUST：所有 API 类型使用后端生成的 TypeScript 定义
 - MUST：移动端和桌面端各测一遍
+- MUST：状态报告列出修改文件、运行命令和契约问题
 - NEVER：在前端存储敏感信息（密码、Token 明文存 localStorage）
 - NEVER：使用 `any` 类型
+- NEVER：自行修改 `.commander/contracts/`
 
 ## 交付自检规范
 

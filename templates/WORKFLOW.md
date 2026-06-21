@@ -9,8 +9,14 @@
 │   │   ├── backend.md        # 当前给后端专家的指令
 │   │   ├── admin.md          # 当前给管理端专家的指令
 │   │   └── miniapp.md        # 当前给小程序专家的指令
-│   ├── contracts/            # 接口契约（唯一真相来源）
-│   │   └── api-v1.yaml       # OpenAPI 契约文件
+│   ├── contracts/            # Contract Bundle（唯一真相来源）
+│   │   ├── openapi.yaml
+│   │   ├── database.md
+│   │   ├── permissions.md
+│   │   ├── error-codes.md
+│   │   ├── frontend-types.md
+│   │   ├── seed-data.md
+│   │   └── mock-rules.md
 │   ├── status/               # 各专家状态报告
 │   │   ├── backend.md        # 后端专家完成报告
 │   │   ├── admin.md          # 管理端专家完成报告
@@ -24,8 +30,27 @@
 │       ├── miniapp.md
 │       └── qa.md
 ├── .skills/                  # 各角色 SKILL 规范
+├── docs/
+│   ├── 00-intake/            # 客户资料、需求审计、人类决策
+│   ├── 01-prd/               # PRD、验收标准、需求追踪表
+│   ├── 02-design/            # DESIGN.md、设计决策
+│   ├── 03-architecture/      # ADR、技术栈决策
+│   └── 04-qa/                # 测试报告、演示脚本
 └── CLAUDE.md                 # 项目总览（可选）
 ```
+
+## 人类批准关口
+
+以下节点必须由人类批准，Commander 才能继续推进：
+
+| Gate | 产物 | 人类要判断什么 |
+|---|---|---|
+| PRD | `docs/01-prd/PRD.md` | 业务范围、用户角色、主流程是否正确 |
+| 设计方向 | `docs/02-design/DESIGN.md` | 产品气质、参考风格、设备优先级是否正确 |
+| 技术栈 | `docs/03-architecture/adr/0001-tech-stack.md` | 是否符合交付、部署、维护约束 |
+| Contract Bundle | `.commander/contracts/` | API、数据、权限、错误码、测试数据是否覆盖主流程 |
+| 客户变更 | `docs/05-change-requests/CR-xxx.md` | 是否接受变更，以及是否影响工期 |
+| 最终交付 | `docs/04-qa/final-acceptance-report.md` | 是否可演示、可交付 |
 
 ## 角色分工
 
@@ -43,9 +68,17 @@
 
 ```
 ┌─────────────────────────────────────────────────┐
+│  人类                                            │
+│  1. 归档客户资料                                 │
+│  2. 回答 P0 问题                                 │
+│  3. 批准 PRD / 设计 / ADR / Contract Bundle      │
+└──────────────────────┬──────────────────────────┘
+                       │
+                       ▼
+┌─────────────────────────────────────────────────┐
 │  指挥官                                          │
-│  1. 分析需求 / 验收上轮产出                       │
-│  2. 写入 .commander/prompts/{role}.md            │
+│  1. 需求审计 / PRD / 设计 / ADR / 契约             │
+│  2. 通过批准关口后写入 prompts                    │
 │  3. 通知专家："指令已更新，开始执行"               │
 └──────────────────────┬──────────────────────────┘
                        │
@@ -92,11 +125,18 @@
 1. 具体任务（附文件路径或接口定义）
 2. ...
 
+## 允许修改
+- backend/...
+
+## 禁止修改
+- .commander/contracts/（除非指令明确要求）
+- 其他专家负责目录
+
 ## 交付标准
 - [ ] 可验证的检查项
 
 ## 参考
-- 契约文件: .commander/contracts/api-v1.yaml
+- 契约包: .commander/contracts/
 - SKILL 规范: .skills/{role}/SKILL.md
 ```
 
@@ -111,9 +151,18 @@
 ## 完成内容
 - 已完成的任务列表
 
+## 修改文件
+- ...
+
+## 运行命令
+- `...`
+
 ## 自检报告
 - [x] 检查项 1
 - [x] 检查项 2
+
+## 契约变更
+- 无 / 已更新 ...
 
 ## 问题与阻塞
 - 无 / 描述遇到的问题
@@ -130,8 +179,8 @@ kiro chat
 
 ```
 你是项目总指挥，遵循 .skills/project-commander/SKILL.md 规范。
-产品文档在 docs/，技术栈 Go+Gin / React+AntD / 微信小程序。
-请自动推进：需求分析 → 契约 → 开发 → 测试 → 部署。
+请先读取 docs/START_COMMANDER_PROMPTS.md，按阶段推进：
+需求审计 → PRD 批准 → 设计/ADR 批准 → Contract Bundle 批准 → 并行开发 → QA → 交付。
 ```
 
 ### 方式二：多终端手动模式
@@ -171,11 +220,12 @@ kiro chat --system-prompt .commander/system-prompts/qa.md
 专家读指令   ← .commander/prompts/{role}.md
 专家写报告   → .commander/status/{role}.md
 指挥官读报告 ← .commander/status/{role}.md
-契约文件     ↔ .commander/contracts/api-v1.yaml
+契约包       ↔ .commander/contracts/
 ```
 
 ## 契约管理
-- 契约文件放在 `.commander/contracts/`
-- 后端专家负责生成/更新契约
-- 前端专家只读契约，不修改
+- Contract Bundle 放在 `.commander/contracts/`
+- 后端专家负责生成/更新 OpenAPI 和后端相关契约
+- 前端、小程序专家只读契约，不修改
 - 指挥官审核契约变更
+- 人类批准 Contract Bundle 后才能并行开发

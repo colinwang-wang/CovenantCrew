@@ -7,7 +7,9 @@ A universal full-stack development Skills suite built on [obra/superpowers](http
 ## File Structure
 
 ```
-skills/
+CovenantCrew/
+├── scripts/
+│   └── init-project.sh   # Project factory: creates docs/.skills/.commander scaffold
 ├── project-commander/
 │   └── SKILL.md          # Project Commander (orchestration, acceptance, quality)
 ├── fullstack-planning/
@@ -29,13 +31,15 @@ skills/
     │   ├── system-prompts/   # Role-specific system prompt templates
     │   │   ├── commander.md
     │   │   ├── backend.md
+    │   │   ├── python-backend.md
     │   │   ├── admin.md
     │   │   ├── miniapp.md
     │   │   └── qa.md
     │   ├── prompts/          # Instruction files
     │   ├── status/           # Status reports
-    │   ├── contracts/        # API contracts
+    │   ├── contracts/        # Contract Bundle
     │   └── phases/           # Phase records
+    ├── project-start/        # Human SOP, kickoff prompts, gates, stack presets, contract templates
     └── WORKFLOW.md           # Collaboration workflow guide
 ```
 
@@ -43,15 +47,47 @@ skills/
 
 ## Usage
 
+### Recommended: Project Factory
+
+```bash
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+./scripts/init-project.sh ../my-project saas_admin "My Project"
+```
+
+After initialization:
+
+1. Put customer source materials into `docs/00-intake/raw/`
+2. Fill `docs/00-intake/intake-packet.md`
+3. Add references to `docs/00-intake/source-links.md`
+4. Send Stage A from `docs/START_COMMANDER_PROMPTS.md` to Commander
+
+Common presets:
+
+| Preset | Best For |
+|---|---|
+| `saas_admin` | SaaS, admin dashboards, CRM/ERP, data-heavy tools |
+| `go_business_platform` | High-concurrency business systems and Go teams |
+| `wechat_business` | WeChat Mini Program + admin + booking/membership/local service flows |
+| `marketing_site` | Brand sites, product sites, landing pages |
+| `custom` | Customer-mandated stacks or legacy system work |
+
 ### New Project Initialization
 ```bash
-# Copy skills specs into your project
-cp -r skills/ my-project/.skills/
-rm -rf my-project/.skills/.git my-project/.skills/templates
+# Enter CovenantCrew repo
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+
+# Recommended: one-command initialization
+./scripts/init-project.sh ../my-project saas_admin "My Project"
+
+# Manual copy if needed
+mkdir -p ../my-project/.skills
+cp -R project-commander fullstack-planning coding-guidelines \
+  go-backend python-backend web-admin-dashboard web-frontend \
+  wechat-miniprogram qa-testing ../my-project/.skills/
 
 # Copy Commander collaboration templates
-cp -r skills/templates/.commander my-project/.commander
-cp skills/templates/WORKFLOW.md my-project/WORKFLOW.md
+cp -R templates/.commander ../my-project/.commander
+cp templates/WORKFLOW.md ../my-project/WORKFLOW.md
 
 # Edit {{PROJECT_NAME}} and {{PROJECT_DESCRIPTION}} in system-prompts
 ```
@@ -84,7 +120,7 @@ Kiro automatically matches and loads skills based on conversation content:
 **Trigger**: Coordinating multi-role development, task assignment, acceptance review, managing dev cadence
 **Core Rules**:
 - Humans decide, AI executes; commander never writes code
-- Contract-first: define interfaces before implementation
+- Contract-first: approve the Contract Bundle before parallel implementation
 - Acceptance must verify functional correctness, not just compilation
 - Every instruction includes context, dependencies, tasks, deliverables, and self-check list
 
@@ -92,9 +128,9 @@ Kiro automatically matches and loads skills based on conversation content:
 **Trigger**: New feature kickoff, requirement analysis, task breakdown, tech review
 **Core Rules**:
 - Socratic requirement clarification (5-question boundary method)
-- Phase-based breakdown: Contract → Backend → Frontend → Acceptance
+- Phase-based breakdown: Intake audit → PRD → Design/ADR → Contract Bundle → Backend → Frontend → Acceptance
 - Task granularity: 2-5 hours; anything larger must be split
-- Contract is the single source of truth for frontend-backend collaboration
+- Contract Bundle is the single source of truth for frontend-backend collaboration
 
 ### 3. go-backend
 **Trigger**: Writing Go APIs, database design, implementing handler/service/repository
@@ -154,11 +190,25 @@ Use with the `.commander/` directory to orchestrate parallel expert development:
 .commander/
 ├── prompts/       # Commander → Expert (task instructions)
 ├── status/        # Expert → Commander (completion reports)
-├── contracts/     # API contracts (single source of truth)
+├── contracts/     # Contract Bundle (single source of truth)
 └── phases/        # Phase records
 ```
 
 See `WORKFLOW.md` in each project for details.
+
+### Contract Bundle
+
+Before parallel implementation starts, `.commander/contracts/` must be approved:
+
+```text
+openapi.yaml        # API paths, requests, responses, auth
+database.md         # Tables, fields, indexes, migration rules
+permissions.md      # Roles, routes, button-level permissions
+error-codes.md      # Error code ranges and frontend handling
+frontend-types.md   # Type generation source and commands
+seed-data.md        # Local, QA, and demo data
+mock-rules.md       # Allowed mock boundaries and removal conditions
+```
 
 ---
 
@@ -167,50 +217,38 @@ See `WORKFLOW.md` in each project for details.
 ### 1. Initialize a New Project
 
 ```bash
-mkdir my-project && cd my-project
-git init
-
-# Copy skills specs (remove unused ones as needed)
-cp -r /path/to/skills .skills && rm -rf .skills/.git
-
-# Create collaboration directories
-mkdir -p .commander/{prompts,status,contracts,phases} docs scripts
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+./scripts/init-project.sh ../my-project wechat_business "My Project"
+cd ../my-project
 
 # Add product documents
-cp ~/requirements.md docs/
-cp ~/prototype.html docs/
+cp ~/requirements.md docs/00-intake/raw/
+cp ~/prototype.html docs/00-intake/raw/
 ```
 
-### 2. Launch kiro-cli
+### 2. Fill Intake Files
+
+- Fill `docs/00-intake/intake-packet.md`
+- Add references to `docs/00-intake/source-links.md`
+
+### 3. Launch kiro-cli
 
 ```bash
 kiro chat
 ```
 
-### 3. Send the Kickoff Prompt
+### 4. Send Stage A
 
-```
-You are the Project Commander, following .skills/project-commander/SKILL.md spec.
+Copy Stage A from `docs/START_COMMANDER_PROMPTS.md`.
 
-Project info:
-- Product docs are in docs/
-- Tech stack: Go+Gin / React+AntD / WeChat Mini Program
-- Database: MySQL root/root123456
+Then approve each stage:
 
-Auto-proceed:
-1. Read all product docs in docs/
-2. Do requirement analysis and Phase breakdown per fullstack-planning spec
-3. Generate expert instructions for each Phase into .commander/prompts/
-4. Use subagent to orchestrate parallel expert execution
-5. Acceptance (run build + read status reports)
-6. Orchestrate QA expert verification
-7. If bugs found, dispatch fixes; if PASS, proceed to next Phase
-8. Loop until all features are complete
-```
-
-### 4. Wait for Completion
-
-The commander will automatically loop through all Phases. You only need to intervene for decisions.
+1. PRD
+2. Design direction
+3. Tech stack ADR
+4. Contract Bundle
+5. Multi-expert parallel implementation
+6. QA and final business acceptance
 
 ### 5. Run the Project
 

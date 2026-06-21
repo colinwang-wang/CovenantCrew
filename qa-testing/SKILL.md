@@ -15,14 +15,25 @@ description: 测试专家规范。当进行接口测试、UI 走查、端到端�
 - NEVER 修改 backend/、admin/、miniapp/ 的代码
 - 可以编写和运行测试脚本
 
-### 2. 验证层次
+### 2. 对照需求追踪验收
+测试不是凭页面感觉判断。每轮 QA 必须读取：
+
+- `docs/01-prd/PRD.md`
+- `docs/01-prd/acceptance-criteria.md`
+- `docs/01-prd/traceability-matrix.md`
+- `.commander/contracts/`
+- `docs/QUALITY_GATES.md`
+
+每个 P0 需求必须能追踪到页面、API、数据对象和测试结果。
+
+### 3. 验证层次
 按优先级从高到低：
 1. **构建通过** — 编译/打包零错误是底线
 2. **接口可用** — API 返回正确业务码，不只看 HTTP 200
 3. **功能完整** — 对照产品文档逐项验证
 4. **数据一致** — 前后端数据格式匹配，契约一致
 
-### 3. 可复现
+### 4. 可复现
 每个 bug 必须包含复现步骤，让开发专家能直接定位。
 
 ## 工作流
@@ -175,12 +186,15 @@ npx playwright show-report             # 查看报告
 ```
 
 ### 4. 契约一致性
-- 对比 `.commander/contracts/api-v1.yaml` 与 `router.go` 中注册的路由
+- 对比 `.commander/contracts/openapi.yaml` 与实际路由
+- 对比 `.commander/contracts/permissions.md` 与前端路由守卫、按钮权限
+- 对比 `.commander/contracts/error-codes.md` 与后端错误码、前端错误处理
 - 对比前端 services 层调用的路径与后端实际路由
 - 检查响应字段名/类型是否匹配
 
 ### 5. 功能走查
 - 对照 `docs/*_spec.md` 逐个功能点检查代码实现
+- 对照 `docs/01-prd/traceability-matrix.md` 检查每个 P0 需求是否有实现和测试
 - 检查页面组件是否有 onClick 绑定、API 调用、数据渲染
 - 检查异常路径（空数据、错误状态、边界值）
 
@@ -197,6 +211,16 @@ npx playwright show-report             # 查看报告
 > 阶段: Phase {N}
 > 测试时间: {timestamp}
 > 结论: PASS | FAIL（{N}个问题）
+
+## 运行命令
+
+- `...`
+
+## 关键证据
+
+- 构建日志：
+- 接口验证：
+- E2E 结果：
 
 ## 测试结果汇总
 
@@ -217,6 +241,12 @@ npx playwright show-report             # 查看报告
 
 ## 通过项
 - [x] ...
+
+## Traceability Coverage
+
+| Requirement ID | Status | Evidence |
+|---|---|---|
+| REQ-001 | PASS / FAIL / NOT TESTED |  |
 ```
 
 ## 严重程度定义
@@ -228,6 +258,9 @@ npx playwright show-report             # 查看报告
 | 🟢 低 | 不影响使用的小问题 | 样式偏差、警告信息、命名不规范 |
 
 ## 约束
+- MUST：每轮 QA 对照 traceability matrix 验证需求覆盖
+- MUST：每轮 QA 对照 Contract Bundle 验证契约一致性
+- MUST：测试报告记录实际运行过的命令和证据
 - MUST：每个 bug 包含复现步骤
 - MUST：区分严重程度并标注建议分派对象
 - MUST：先跑构建再做功能测试

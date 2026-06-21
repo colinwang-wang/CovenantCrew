@@ -7,7 +7,9 @@
 ## 文件结构
 
 ```
-skills/
+CovenantCrew/
+├── scripts/
+│   └── init-project.sh   # 新项目工厂：生成 docs/.skills/.commander 骨架
 ├── project-commander/
 │   └── SKILL.md          # 项目总指挥规范（调度、验收、质量把控）
 ├── fullstack-planning/
@@ -29,13 +31,15 @@ skills/
     │   ├── system-prompts/   # 各角色系统提示词模板
     │   │   ├── commander.md
     │   │   ├── backend.md
+    │   │   ├── python-backend.md
     │   │   ├── admin.md
     │   │   ├── miniapp.md
     │   │   └── qa.md
     │   ├── prompts/          # 指令文件目录
     │   ├── status/           # 状态报告目录
-    │   ├── contracts/        # 接口契约目录
+    │   ├── contracts/        # Contract Bundle 目录
     │   └── phases/           # 阶段记录目录
+    ├── project-start/        # 人类 SOP、启动提示词、质量门、技术栈预设、契约模板
     └── WORKFLOW.md           # 协作工作流说明
 ```
 
@@ -43,15 +47,59 @@ skills/
 
 ## 使用方式
 
+### 人类项目启动 SOP
+
+当拿到一个新项目时，先按 `templates/project-start/HUMAN_SOP.md` 执行。这个流程把人类动作限定在资料归档、P0 问题确认、PRD 批准、设计方向批准、技术栈 ADR 批准、Contract Bundle 批准和最终业务验收。
+
+配套模板：
+
+- `templates/project-start/PROJECT_INTAKE_PACKET.md`：客户资料收集表
+- `templates/project-start/START_COMMANDER_PROMPTS.md`：分阶段启动 Commander 的可复制提示词
+- `templates/project-start/QUALITY_GATES.md`：从需求到交付的质量门清单
+- `templates/project-start/STACK_PRESETS.yml`：技术栈预设
+- `templates/project-start/contract-bundle/`：API、数据库、权限、错误码、类型、测试数据、mock 边界模板
+
+### 推荐：项目工厂初始化
+
+```bash
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+./scripts/init-project.sh ../my-project saas_admin "My Project"
+```
+
+生成后你只需要：
+
+1. 把客户资料放进 `docs/00-intake/raw/`
+2. 填写 `docs/00-intake/intake-packet.md`
+3. 把参考链接写到 `docs/00-intake/source-links.md`
+4. 把 `docs/START_COMMANDER_PROMPTS.md` 里的“阶段 A：需求审计”发给 Commander
+
+常用 preset：
+
+| Preset | 适用场景 |
+|---|---|
+| `saas_admin` | SaaS、中后台、CRM/ERP、数据密集管理系统 |
+| `go_business_platform` | 高并发业务系统、Go 团队、清晰 API 边界 |
+| `wechat_business` | 小程序 + 管理后台 + 预约/会员/本地服务 |
+| `marketing_site` | 品牌站、产品官网、营销页 |
+| `custom` | 客户指定技术栈或旧系统改造 |
+
 ### 新项目初始化
 ```bash
-# 复制 skills 规范到项目中
-cp -r skills/ my-project/.skills/
-rm -rf my-project/.skills/.git my-project/.skills/templates
+# 进入 CovenantCrew 仓库
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+
+# 推荐：一键初始化
+./scripts/init-project.sh ../my-project saas_admin "My Project"
+
+# 如需手动复制 skills 规范
+mkdir -p ../my-project/.skills
+cp -R project-commander fullstack-planning coding-guidelines \
+  go-backend python-backend web-admin-dashboard web-frontend \
+  wechat-miniprogram qa-testing ../my-project/.skills/
 
 # 复制 Commander 协作模板
-cp -r skills/templates/.commander my-project/.commander
-cp skills/templates/WORKFLOW.md my-project/WORKFLOW.md
+cp -R templates/.commander ../my-project/.commander
+cp templates/WORKFLOW.md ../my-project/WORKFLOW.md
 
 # 编辑 system-prompts 中的 {{PROJECT_NAME}} 和 {{PROJECT_DESCRIPTION}}
 ```
@@ -85,7 +133,7 @@ Kiro 会根据对话内容自动匹配并加载 skill：
 **触发场景**：协调多角色协同开发、分配任务、验收产出、管理开发节奏
 **核心规则**：
 - 人做决策，AI 做执行；指挥官不写代码
-- 契约优先，先定接口再开发
+- 契约优先，先定 Contract Bundle 再并行开发
 - 验收必须验证功能可用性，不只看编译通过
 - 每份指令包含背景、依赖、任务、交付标准、自检清单
 
@@ -93,9 +141,9 @@ Kiro 会根据对话内容自动匹配并加载 skill：
 **触发场景**：新功能启动、需求分析、任务拆解、技术评审
 **核心规则**：
 - 苏格拉底式需求澄清（5 个问题边界法）
-- 按 Phase 拆解：契约 → 后端 → 前端 → 验收
+- 按 Phase 拆解：需求审计 → PRD → 设计/ADR → Contract Bundle → 后端 → 前端 → 验收
 - 任务粒度 2-5 工时，超过必须拆分
-- 契约是前后端协作的唯一真相来源
+- Contract Bundle 是前后端协作的唯一真相来源
 
 ### 3. go-backend
 **触发场景**：编写 Go API、设计数据库、实现 handler/service/repository
@@ -155,11 +203,25 @@ Kiro 会根据对话内容自动匹配并加载 skill：
 .commander/
 ├── prompts/       # 指挥官 → 专家（当前任务指令）
 ├── status/        # 专家 → 指挥官（完成报告）
-├── contracts/     # 接口契约（唯一真相来源）
+├── contracts/     # Contract Bundle（唯一真相来源）
 └── phases/        # 阶段记录
 ```
 
 详见各项目中的 `WORKFLOW.md`。
+
+### Contract Bundle
+
+并行开发前必须先批准 `.commander/contracts/`：
+
+```text
+openapi.yaml        # API 路径、请求、响应、鉴权
+database.md         # 表、字段、索引、迁移规则
+permissions.md      # 角色、路由、按钮级权限
+error-codes.md      # 错误码范围和前端处理
+frontend-types.md   # 类型生成来源和命令
+seed-data.md        # 本地、测试、演示数据
+mock-rules.md       # 允许 mock 的边界和移除条件
+```
 
 ---
 
@@ -168,50 +230,38 @@ Kiro 会根据对话内容自动匹配并加载 skill：
 ### 1. 初始化新项目
 
 ```bash
-mkdir my-project && cd my-project
-git init
-
-# 复制 skills 规范（按需删除不用的）
-cp -r /path/to/skills .skills && rm -rf .skills/.git
-
-# 创建协作目录
-mkdir -p .commander/{prompts,status,contracts,phases} docs scripts
+cd /Users/clwang/workspace/OutWorks/CovenantCrew
+./scripts/init-project.sh ../my-project wechat_business "My Project"
+cd ../my-project
 
 # 放入产品文档
-cp ~/产品需求.md docs/
-cp ~/原型.html docs/
+cp ~/产品需求.md docs/00-intake/raw/
+cp ~/原型.html docs/00-intake/raw/
 ```
 
-### 2. 启动 kiro-cli
+### 2. 填写资料
+
+- 填写 `docs/00-intake/intake-packet.md`
+- 写入参考链接到 `docs/00-intake/source-links.md`
+
+### 3. 启动 kiro-cli
 
 ```bash
 kiro chat
 ```
 
-### 3. 发送启动指令
+### 4. 发送阶段 A 指令
 
-```
-你是项目总指挥，遵循 .skills/project-commander/SKILL.md 规范。
+复制 `docs/START_COMMANDER_PROMPTS.md` 里的“阶段 A：需求审计”。
 
-项目信息：
-- 产品文档在 docs/ 目录
-- 技术栈：Go+Gin / React+AntD / 微信小程序
-- 数据库：MySQL root/root123456
+之后按阶段批准：
 
-请自动推进：
-1. 阅读 docs/ 下所有产品文档
-2. 按 fullstack-planning 规范做需求分析和 Phase 拆解
-3. 每个 Phase 生成各专家指令到 .commander/prompts/
-4. 用 subagent 调度专家并行执行
-5. 验收（跑构建 + 读 status 报告）
-6. 调度测试专家验证
-7. 有 bug 则分派修复，PASS 则进入下一 Phase
-8. 循环直到全部功能完成
-```
-
-### 4. 等待完成
-
-指挥官会自动循环执行所有 Phase，你只需要在遇到问题时介入决策。
+1. PRD
+2. 设计方向
+3. 技术栈 ADR
+4. Contract Bundle
+5. 多专家并行开发
+6. QA 与最终业务验收
 
 ### 5. 启动项目
 

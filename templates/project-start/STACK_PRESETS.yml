@@ -1,0 +1,91 @@
+# Standard stack presets for new projects.
+# Use these as a starting point, then confirm the final choice in an ADR.
+
+saas_admin:
+  fit:
+    - SaaS back office
+    - CRM/ERP-style workflows
+    - Data-heavy admin dashboards
+  frontend:
+    admin: React + Vite + TypeScript + Ant Design
+  backend:
+    runtime: Python + FastAPI
+    database: PostgreSQL
+    cache: Redis optional
+    auth: JWT + RBAC
+  quality:
+    unit: pytest
+    e2e: Playwright
+    contract: OpenAPI
+  tradeoffs:
+    - Fast delivery and high maintainability
+    - Less ideal for complex real-time workloads without extra design
+
+go_business_platform:
+  fit:
+    - High-concurrency business systems
+    - Clear API boundaries
+    - Teams comfortable with Go
+  frontend:
+    admin: React + Vite + TypeScript + Ant Design
+    web: React + Vite + TypeScript
+  backend:
+    runtime: Go + Gin
+    database: MySQL or PostgreSQL
+    cache: Redis optional
+    auth: JWT + RBAC
+  quality:
+    unit: go test ./...
+    e2e: Playwright
+    contract: OpenAPI
+  tradeoffs:
+    - Strong performance and deployment simplicity
+    - More boilerplate than FastAPI for rapid CRUD projects
+
+wechat_business:
+  fit:
+    - WeChat Mini Program plus admin dashboard
+    - Booking, membership, local services, commerce-like flows
+  frontend:
+    admin: React + Vite + TypeScript + Ant Design
+    miniapp: WeChat native Mini Program + TypeScript
+  backend:
+    runtime: Go + Gin or Python + FastAPI
+    database: MySQL
+    cache: Redis optional
+    auth: JWT + WeChat session
+  quality:
+    unit: backend test suite
+    e2e: Playwright for admin, manual/simulator checklist for miniapp
+    contract: OpenAPI + Mini Program request types
+  tradeoffs:
+    - Best fit when WeChat ecosystem is central
+    - Requires privacy and submission compliance checks
+
+marketing_site:
+  fit:
+    - Brand site
+    - Product landing pages
+    - Content-light public websites
+  frontend:
+    web: Next.js + TypeScript
+  backend:
+    runtime: None or lightweight API routes
+    cms: Optional headless CMS
+  quality:
+    visual: responsive screenshot review
+    e2e: Playwright smoke tests
+    performance: Lighthouse
+  tradeoffs:
+    - Strong SEO and delivery speed
+    - Not a good default for complex internal tools
+
+custom:
+  fit:
+    - Existing customer stack
+    - Legacy integration
+    - Special compliance or deployment constraints
+  decision_required:
+    - Explain why no standard preset fits
+    - Write a full ADR before implementation
+

@@ -10,6 +10,27 @@ description: 全栈项目需求分析与任务拆解。当开始新功能开发�
 
 ## 工作流
 
+### 0. 项目启动资料
+
+新项目必须先整理以下输入，缺失内容要进入需求审计，不得直接假设为已确认：
+
+```text
+docs/00-intake/
+├── raw/                 # 客户原始资料
+├── intake-packet.md     # 人类填写的项目信息
+├── source-links.md      # 参考链接
+├── requirement-audit.md # 需求审计
+├── assumptions.md       # 假设清单
+└── decision-log.md      # 人类决策记录
+```
+
+需求分析阶段必须输出：
+
+- `docs/01-prd/PRD.md`
+- `docs/01-prd/acceptance-criteria.md`
+- `docs/01-prd/traceability-matrix.md`
+- `docs/01-prd/out-of-scope.md`
+
 ### 1. 需求澄清（苏格拉底式提问）
 
 在写任何代码或设计文档前，必须依次确认以下问题：
@@ -20,29 +41,42 @@ description: 全栈项目需求分析与任务拆解。当开始新功能开发�
 4. **数据从哪来？** 新增数据还是改造现有表？是否需要对接外部服务？
 5. **验收标准？** 如何证明这个功能做完了？（可演示的 UI 状态 / API 返回 / 日志记录）
 
+#### 问题优先级
+
+| 优先级 | 定义 | 处理方式 |
+|---|---|---|
+| P0 | 影响主流程、权限、数据模型、价格、交付范围 | 必须人类确认后继续 |
+| P1 | 影响体验、筛选项、通知、统计口径 | 尽量确认，可标注假设 |
+| P2 | 文案、低风险样式、可配置细节 | 可后置 |
+
 ### 2. 多端任务拆解
 
 按以下顺序拆解任务，确保依赖关系正确：
 
 ```
-Phase 1: 契约与数据（必须先完成）
-  ├─ TSK-001: 设计数据库表结构（ER 图 + 迁移脚本）
-  ├─ TSK-002: 定义 API 接口契约（Request/Response + 错误码）
-  └─ TSK-003: 生成前端共享类型定义
+Phase 0: 需求与决策（必须先完成）
+  ├─ TSK-000: 需求审计 + PRD
+  ├─ TSK-001: 设计方向 + DESIGN.md
+  └─ TSK-002: 技术栈 ADR
+
+Phase 1: Contract Bundle 与数据（必须先完成）
+  ├─ TSK-010: 设计数据库表结构（ER 图 + 迁移脚本）
+  ├─ TSK-011: 定义 API 接口契约（Request/Response + 错误码）
+  └─ TSK-012: 生成前端共享类型定义
 
 Phase 2: 后端实现
-  ├─ TSK-004: 实现 repository 层（CRUD + 单元测试）
-  ├─ TSK-005: 实现 service 层（业务逻辑 + 事务）
-  └─ TSK-006: 实现 handler 层（参数绑定 + 权限守卫）
+  ├─ TSK-020: 实现 repository 层（CRUD + 单元测试）
+  ├─ TSK-021: 实现 service 层（业务逻辑 + 事务）
+  └─ TSK-022: 实现 handler 层（参数绑定 + 权限守卫）
 
 Phase 3: 前端实现（依赖 Phase 2 的接口）
-  ├─ TSK-007: 页面开发
-  ├─ TSK-008: 状态管理与 API 对接
-  └─ TSK-009: 国际化配置（如需要）
+  ├─ TSK-030: 页面开发
+  ├─ TSK-031: 状态管理与 API 对接
+  └─ TSK-032: 国际化配置（如需要）
 
 Phase 4: 验收与交付
-  ├─ TSK-010: 联调测试（前后端端到端验证）
-  └─ TSK-011: 部署测试 + 上线 checklist
+  ├─ TSK-040: 联调测试（前后端端到端验证）
+  └─ TSK-041: 部署测试 + 上线 checklist
 ```
 
 ### 2.1 契约规范（Contract First）
@@ -52,11 +86,28 @@ Phase 4: 验收与交付
 #### 契约的产出链
 
 ```
-后端接口定义（唯一源头）
+PRD traceability matrix
+    ↓
+Contract Bundle
+    ↓
+后端接口定义
     ↓ 自动生成
 API 文档（OpenAPI/Swagger）
     ↓ 代码生成工具
 前端类型定义（TypeScript）
+```
+
+#### Contract Bundle 必需文件
+
+```text
+.commander/contracts/
+├── openapi.yaml        # API 路径、请求、响应、鉴权
+├── database.md         # 表、字段、索引、迁移规则
+├── permissions.md      # 角色、路由、按钮级权限
+├── error-codes.md      # 错误码范围和前端处理
+├── frontend-types.md   # 类型生成来源和命令
+├── seed-data.md        # 本地、测试、演示数据
+└── mock-rules.md       # 允许 mock 的边界和移除条件
 ```
 
 #### 谁有权修改契约
@@ -127,6 +178,23 @@ API 文档（OpenAPI/Swagger）
 6. **部署注意**：特殊配置要求
 7. **回滚方案**：如果上线后出问题，如何快速回滚
 
+### 4.1 技术栈 ADR
+
+新项目必须基于 `templates/project-start/STACK_PRESETS.yml` 或客户既有约束生成 ADR：
+
+```text
+docs/03-architecture/adr/0001-tech-stack.md
+```
+
+ADR 必须说明：
+
+1. 选择什么技术栈
+2. 为什么选择
+3. 放弃了哪些方案
+4. 当前选择的风险
+5. 如何部署、测试、扩展
+6. 人类批准记录
+
 ### 5. 验收标准定义
 
 | 任务类型 | 验收标准 |
@@ -136,7 +204,10 @@ API 文档（OpenAPI/Swagger）
 | 联调 | 端到端测试覆盖主路径 + 3 个异常路径 |
 
 ## 约束
+- MUST：新项目先做需求审计、PRD、traceability matrix，再做契约和开发
+- MUST：技术栈必须有 ADR，不能只在对话中口头指定
 - MUST：任何开发工作开始前，必须先完成接口契约定义
+- MUST：Contract Bundle 必须经人类批准后才能并行开发
 - MUST：任务粒度不超过 5 工时
 - MUST：涉及外部服务对接的功能必须标记高风险
 - NEVER：在需求未澄清前直接给出技术实现代码

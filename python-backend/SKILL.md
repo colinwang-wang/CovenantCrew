@@ -39,10 +39,17 @@ app/
 ## 工作流
 
 ### 1. 接口契约优先（Contract First）
-1. **定义 Pydantic Schema**：`schemas/` 目录下定义 Request/Response 模型
-2. **自动生成文档**：FastAPI 自动生成 OpenAPI/Swagger（`/docs`）
-3. **生成前端类型**：通过代码生成工具从 OpenAPI JSON 生成 TypeScript 类型
-4. **禁止反向推导**：前端以生成的类型文件为准
+1. **读取 Contract Bundle**：先读 `.commander/contracts/`，确认 API、数据库、权限、错误码和 mock 边界
+2. **定义 Pydantic Schema**：`schemas/` 目录下定义 Request/Response 模型
+3. **自动生成文档**：FastAPI 自动生成 OpenAPI/Swagger（`/docs`），并同步 `.commander/contracts/openapi.yaml`
+4. **生成前端类型**：通过代码生成工具从 OpenAPI JSON 生成 TypeScript 类型
+5. **禁止反向推导**：前端以生成的类型文件为准
+
+#### 后端可修改的契约
+
+- 可修改：`openapi.yaml`、`database.md`、`error-codes.md`、`seed-data.md`
+- 需指挥官批准后修改：已批准接口行为、字段含义、权限规则
+- 不可修改：前端/小程序实现目录
 
 ### 2. 分层约束
 
@@ -95,6 +102,8 @@ async def require_role(role: str):
 - MUST：数据库迁移使用 Alembic
 - MUST：敏感配置通过环境变量或 `.env` 文件管理
 - MUST：密码使用 bcrypt 加密
+- MUST：任何 mock 都必须登记到 `.commander/contracts/mock-rules.md`
+- MUST：状态报告列出修改文件、运行命令和契约变更
 - NEVER：在 api 层写业务逻辑
 - NEVER：硬编码文件路径或配置值
 - NEVER：同步阻塞调用（使用 async/await）

@@ -13,10 +13,17 @@ description: Go 后端 API 与服务开发规范。当进行 Go 后端开发、�
 ### 1. 接口契约优先（Contract First）
 在编写任何业务代码前，必须先完成以下步骤：
 
-1. **定义 Request / Response 结构体**：使用 `json` tag 明确字段，嵌套结构体必须独立定义，禁止匿名嵌套
-2. **生成接口文档**：使用 `go-swagger` 注解或 protobuf 定义服务契约
-3. **生成前端类型**：通过 `swagger-typescript-api` 或 protobuf 插件生成 TypeScript 类型定义文件，供小程序和 Web 端使用
-4. **禁止反向推导**：前端 NEVER 直接阅读 Go 源码推断类型，必须以生成的契约文件为准
+1. **读取 Contract Bundle**：先读 `.commander/contracts/`，确认 API、数据库、权限、错误码和 mock 边界
+2. **定义 Request / Response 结构体**：使用 `json` tag 明确字段，嵌套结构体必须独立定义，禁止匿名嵌套
+3. **生成接口文档**：使用 `go-swagger` 注解或 protobuf 定义服务契约，并同步 `.commander/contracts/openapi.yaml`
+4. **生成前端类型**：通过 `swagger-typescript-api` 或 protobuf 插件生成 TypeScript 类型定义文件，供小程序和 Web 端使用
+5. **禁止反向推导**：前端 NEVER 直接阅读 Go 源码推断类型，必须以生成的契约文件为准
+
+#### 后端可修改的契约
+
+- 可修改：`openapi.yaml`、`database.md`、`error-codes.md`、`seed-data.md`
+- 需指挥官批准后修改：已批准接口行为、字段含义、权限规则
+- 不可修改：前端/小程序实现目录
 
 ### 2. 测试驱动开发（TDD）
 严格执行 RED → GREEN → REFACTOR 循环：
@@ -68,6 +75,8 @@ description: Go 后端 API 与服务开发规范。当进行 Go 后端开发、�
 - MUST：每个注册的路由必须有对应的完整 handler 实现，禁止空函数或 TODO 占位
 - MUST：前端依赖的每个接口路径必须在 router.go 中注册，交付前用脚本对比契约文件与路由注册
 - MUST：Mock 实现（如 AI 接口）必须在函数头部注释标注 `// MOCK: 待接入真实服务`
+- MUST：任何 mock 都必须登记到 `.commander/contracts/mock-rules.md`
+- MUST：状态报告列出修改文件、运行命令和契约变更
 - NEVER：在 handler 层写业务逻辑
 - NEVER：在 repository 层调用外部 HTTP 接口
 - NEVER：路由注册后不实现 handler（会导致前端 404）

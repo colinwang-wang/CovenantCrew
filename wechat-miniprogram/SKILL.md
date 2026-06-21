@@ -32,6 +32,7 @@ description: 微信小程序开发规范与合规检查。当开发微信小程�
 5. **HTTP 方法**：前端请求方法必须与后端路由注册方法一致（如后端用 PUT，前端不得用 POST）
 6. **特殊路由**：登录等不在统一 API 前缀下的路由，使用独立 baseUrl 参数或绝对路径
 7. **禁止占位**：页面事件处理函数不得仅用 `wx.showToast('开发中')` 占位，必须实现完整逻辑或在 Phase 计划中明确标注延期
+8. **契约消费者**：从 `.commander/contracts/` 使用生成类型和错误码规则，发现不一致时报告，不自行修改契约
 
 ### 4. 支付与特殊场景
 
@@ -54,8 +55,10 @@ description: 微信小程序开发规范与合规检查。当开发微信小程�
 - MUST：隐私接口调用前检查 `wx.requirePrivacyAuthorize`
 - MUST：敏感数据走后端接口，前端禁止本地存储
 - MUST：图片资源走 CDN
+- MUST：状态报告列出修改文件、运行命令和契约问题
 - NEVER：WXML 中写复杂表达式，必须抽离到 JS
 - NEVER：onLoad 中串行发起超过 3 个网络请求
+- NEVER：自行修改 `.commander/contracts/`
 
 ## 交付自检规范
 

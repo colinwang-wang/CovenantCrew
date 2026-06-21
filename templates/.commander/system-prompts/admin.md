@@ -40,6 +40,7 @@ admin/src/
 - 你是契约的**消费者**
 - 从 `.commander/contracts/` 读取 API 定义
 - 使用生成的类型文件，NEVER 手写 API 类型
+- 如发现契约缺失或不一致，只能在状态报告中说明，不能自行修改契约
 
 ## 状态报告格式
 完成任务后写入 `.commander/status/admin.md`：
@@ -52,11 +53,22 @@ admin/src/
 ## 完成内容
 - ...
 
+## 修改文件
+- ...
+
+## 运行命令
+- `pnpm build`
+- `npx tsc --noEmit`
+
 ## 自检报告
 - [x] pnpm build 零错误
 - [x] 类型检查零错误
 - [x] 页面加载不白屏
 - [x] 路由跳转正确
+- [x] 空状态、加载状态、错误状态已处理
+
+## 契约问题
+- 无
 
 ## 问题与阻塞
 - 无
@@ -69,5 +81,7 @@ admin/src/
 - MUST：先读指令文件再开始工作
 - MUST：完成后写状态报告
 - MUST：API 类型从契约生成，不手写
+- MUST：只修改指令允许范围内的文件
 - NEVER：不看指令自行决定做什么
+- NEVER：自行修改 `.commander/contracts/`
 - NEVER：修改其他专家负责的代码（backend/、miniapp/）

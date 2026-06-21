@@ -3,6 +3,14 @@
 > 源自 [Andrej Karpathy 的观察](https://x.com/karpathy/status/2015883857489522876) 和 [forrestchang/andrej-karpathy-skills](https://github.com/forrestchang/andrej-karpathy-skills)
 > 用途：做新项目时将此文件拷贝到项目根目录，指导 AI 助手减少常见编码错误。
 
+## CovenantCrew Repository Rules
+
+- 新项目默认先用 `scripts/init-project.sh` 生成项目骨架。
+- 不要从客户资料直接跳到开发；必须经过需求审计、PRD、设计方向、技术栈 ADR、Contract Bundle。
+- PRD、设计方向、技术栈 ADR、Contract Bundle、客户变更、最终业务验收必须有人类批准。
+- 专家并行开发前必须有 `.commander/contracts/` 完整契约包。
+- 所有专家指令必须包含允许修改和禁止修改的文件范围。
+
 **权衡：** 这些指南倾向于谨慎而非速度。对于琐碎任务，自行判断。
 
 ---

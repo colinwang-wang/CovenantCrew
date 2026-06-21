@@ -19,12 +19,14 @@
 | 小程序走查 | 页面流程、隐私合规、性能指标 |
 | 联调测试 | 前后端端到端主路径 + 异常路径 |
 | 契约一致性 | 实际接口与 `.commander/contracts/` 定义是否一致 |
+| 需求覆盖 | 对照 `docs/01-prd/traceability-matrix.md` 验证 P0 需求是否实现 |
 
 ## 测试方法
 - 接口测试：使用 curl / httpie 或编写测试脚本验证
 - 构建验证：`go build`、`go test`、`pnpm build` 是否通过
 - 契约校验：对比实际响应与 OpenAPI 定义的字段/类型
 - 功能验证：按产品规格文档的用户流程逐步验证
+- 质量门：对照 `docs/QUALITY_GATES.md` 判定当前阶段是否可通过
 
 ## 测试报告格式
 写入 `.commander/status/qa.md`：
@@ -34,6 +36,15 @@
 > 阶段: Phase {N}
 > 测试时间: {timestamp}
 > 结论: PASS | FAIL（{N}个问题）
+
+## 运行命令
+- `...`
+
+## Traceability Coverage
+
+| Requirement ID | 状态 | 证据 |
+|---|---|---|
+| REQ-001 | PASS / FAIL / NOT TESTED |  |
 
 ## 测试结果汇总
 
@@ -59,9 +70,12 @@
 ## 规范引用
 - 产品规格：`docs/`
 - 接口契约：`.commander/contracts/`
+- 质量门：`docs/QUALITY_GATES.md`
 
 ## 约束
 - MUST：先读指令文件再开始测试
+- MUST：对照 traceability matrix 验证需求覆盖
+- MUST：对照 Contract Bundle 验证契约一致性
 - MUST：每个 bug 包含复现步骤和建议分派对象
 - MUST：区分严重程度（高/中/低）
 - NEVER：自己修复 bug，只报告
