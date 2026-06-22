@@ -1,4 +1,4 @@
-# Kiro Skills Collection
+# Skills Collection
 
 基于 [obra/superpowers](https://github.com/obra/superpowers) 核心思想，针对 Kiro IDE 格式定制的一套通用全栈开发 Skills。
 
